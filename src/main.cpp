@@ -13,6 +13,8 @@
 int direction = CW;
 int CLK_state;
 int prev_CLK_state;
+unsigned long lastEnc = 0;
+const int encDebounce = 5; // ms
 ezButton button(SW_PIN);
 
 #define I2C_addr 0x3C
@@ -26,21 +28,25 @@ PulseOximeter pox;
 int menu = 0;
 int counter = 0;
 int measure_done = 0;
-int HeartRateMode, inUse;
-
+int HeartRateMode = 0;
+int BodyFatMode = 0;
+int inUse = 0;
+int height_done = 0;
+int weight_done = 0;
+bool onFinger = false;
 const unsigned long REPORTING_PERIOD_MS = 1000;
 unsigned long tsLastReport = 0;
 uint16_t spo2_sum = 0;
 float hr_sum = 0.0f;
-
-bool onFinger = false;
+int height_ = 0;
+int weight_ = 0;
 
 void setup() 
 {
   Serial.begin(9600);
   pinMode(DT_PIN, INPUT_PULLUP);
   pinMode(CLK_PIN, INPUT_PULLUP);
-  button.setDebounceTime(250);
+  button.setDebounceTime(350);
   prev_CLK_state = digitalRead(CLK_PIN);
 
   display.begin(SSD1306_SWITCHCAPVCC, I2C_addr);
@@ -57,20 +63,40 @@ void setup()
 
 void loop() 
 {
+  unsigned long now = millis();
   unsigned long curr_t = millis();
   button.loop();
   pox.update();
   CLK_state = digitalRead(CLK_PIN);
-
-  if (CLK_state != prev_CLK_state && CLK_state == HIGH && !inUse) 
+    
+  if (CLK_state != prev_CLK_state) 
   {
-    if (digitalRead(DT_PIN)) 
+    if (now - lastEnc > encDebounce) 
     {
-      direction = CW;
-    } 
-    else 
-    {
-      direction = CCW;
+      if (CLK_state == HIGH) 
+      {
+        if(digitalRead(DT_PIN) != CLK_state)
+        {
+          direction = CW;
+          height_ -= 10;
+          
+          if(height_done == 1 && weight_done == 0)
+          {
+            weight_ += 10;
+          }
+        } 
+        else 
+        {
+          direction = CCW;
+          height_ += 10;
+          
+          if(height_done == 1 && weight_done == 0)
+          {
+            weight_ += 10;
+          }
+        }
+      }
+      lastEnc = now;
     }
 
     if(inUse == 0)
@@ -87,23 +113,26 @@ void loop()
         display.drawBitmap(0, 0, bitmaps[1], 128, 64, SSD1306_BLACK, SSD1306_WHITE);
         menu = 1;
       }
-      display.display(); 
+      display.display();
     }
   }
   prev_CLK_state = CLK_state;
 
-  if(menu == 0)
+  if(menu == 0 && button.isPressed())
   {
-    if(button.isPressed())
-    {
-      HeartRateMode = 1;
-      inUse = 1;
-    }
+    HeartRateMode = 1;
+    inUse = 1;
+  }
+  if(menu == 1 && button.isReleased())
+  {
+    BodyFatMode = 1;
+    inUse = 1;
   }
 
   if(menu == 0 && HeartRateMode == 1 && inUse == 1)
   {    
-    if (pox.getHeartRate() <= 0 && pox.getSpO2() <= 0) {
+    if (pox.getHeartRate() <= 0 && pox.getSpO2() <= 0) 
+    {
       for(int index = 5; index < 8; index++)
       {
         display.clearDisplay();
@@ -111,7 +140,8 @@ void loop()
         display.display();
       }  
     }
-    else {
+    else 
+    {
       if (curr_t - tsLastReport >= REPORTING_PERIOD_MS) 
       {
         uint8_t spo2 = pox.getSpO2();
@@ -144,32 +174,88 @@ void loop()
         }
       }
     }
+
+    if(measure_done)
+    {
+      display.clearDisplay();
+      float hr_avg = hr_sum/10.0f;
+      uint8_t spo2_avg = spo2_sum/10;
+      
+      display.setCursor(0, 0);
+      display.setTextSize(2);
+      display.printf("HeartRate:%.2fbpm\n", hr_avg);
+      display.printf("SPo2:%d%%", spo2_avg);
+      display.display();
+
+      if(button.isPressed())
+      {
+        measure_done = 0;
+        HeartRateMode = 0;
+        inUse = 0;
+        menu = -1;
+        onFinger = false;
+        spo2_sum = 0;
+        hr_sum = 0.0f;
+        display.clearDisplay();
+        display.drawBitmap(0, 0, bitmaps[0], 128, 64, SSD1306_BLACK, SSD1306_WHITE);
+        display.display();
+      }
+    }
   }
 
-  display.clearDisplay();
-  if(measure_done)
+  if(menu == 1 && BodyFatMode == 1 && inUse == 1)
   {
-    float hr_avg = hr_sum/10.0f;
-    uint8_t spo2_avg = spo2_sum/10;
-
-    display.setCursor(0, 0);
-    display.setTextSize(2);
-    display.printf("HeartRate:%.2fbpm\n", hr_avg);
-    display.printf("SPo2:%d%%", spo2_avg);
-    display.display();
-  }
-
-  if(button.isPressed() && measure_done && HeartRateMode && inUse)
-  {
-    measure_done = 0;
-    HeartRateMode = 0;
-    inUse = 0;
-    menu = -1;
-    onFinger = false;
-    spo2_sum = 0;
-    hr_sum = 0.0f;
     display.clearDisplay();
-    display.drawBitmap(0, 0, bitmaps[0], 128, 64, SSD1306_BLACK, SSD1306_WHITE);
-    display.display();
+
+    if(height_done == 0 && weight_done == 0)
+    {
+      if(height_ < 0)
+      {
+        height_ = 0;
+      }
+      display.setCursor(0, 0);
+      display.printf("height:%d", height_);
+      display.display();
+      if(button.isPressed())
+      {
+        height_done = 1;
+      }
+    }
+    else if(height_done == 1 && weight_done == 0)
+    {
+      if(weight_ < 0)
+      {
+        weight_ = 0;
+      }
+      display.setCursor(0, 0);
+      display.printf("weight:%d", weight_);
+      display.display();
+
+      if(button.isPressed())
+      {
+        weight_done = 1;
+      }
+    }
+    else if(height_done == 1 && weight_done == 1) 
+    {
+      int bmi = weight_ / ((height_/100) * (height_/100));
+      display.setCursor(0, 0);
+      display.printf("BMI : %d", bmi);
+      display.display();
+
+      if (button.isPressed())
+      {
+        BodyFatMode = 0;
+        inUse = 0;
+        height_done = 0;
+        weight_done = 0;
+        height_ = 0;
+        weight_ = 0;
+        menu = -1;
+        display.clearDisplay();
+        display.drawBitmap(0, 0, bitmaps[1], 128, 64, SSD1306_BLACK, SSD1306_WHITE);
+        display.display();
+      }
+    }
   }
 }
