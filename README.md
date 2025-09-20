@@ -6,6 +6,13 @@ This is `R2 Chan Ui Sang Le B` 's repository for project's subject CPE-213 Micro
 This project aims to create device that measure heart rate, oxygen in user's blood and calculate user's BMI. This device is based on `ESP32 DOIT DEVKIT V1` and has `MAX30100 Pulse Oximeter` and `KY040 Rotary Encoder` acts as input and using `LED`, `Buzzer` and `Adafruit OLED 128x64 Display` acts as output.<br></br>
 By using `ESP32` as main processor unit offer a power efficient and good computational speed combine with `Pulse Oximeter` which has heart rate sensor and blood level oxygen sensor this device can be use in many aplications such as in hostipal, clinic, etcs. Using `Rotary Encoder` alongside with `OLED display` to easily receive inputs from user and allow user to navigates through menus combine with `OLED Display` to show user interfaces increasing user's friendly element.<br></br>
 
+> ### _3D Model of Device_
+
+<br></br>
+
+> ### _Actual Picture of Device_
+
+<br></br>
 > ### _Features_
 1. Measure user's <ins>heart rate</ins>.
 2. Measure user's <ins>blood oxygen level</ins>.
