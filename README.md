@@ -1,7 +1,18 @@
 # __Vital Health Index VHI__
 This is `R2 Chan Ui Sang Le B` 's repository for project's subject CPE-213 Microcontroller.
 
-## Overview
+## Table of Contents
+* [Introduction](#introduction)
+* [Features](#features)
+* [Components](#components)
+* [How to use this Device](#how-to-use-this-device)
+* [Circuit Diagram](#systems-circuit-diagram)
+* [Block Diagram](#block-diagram-of-overall-workflow)
+* [3D Model](#3d-model-of-device)
+* [Actual Image](#actual-picture-of-device)
+* [Demo](#demo)
+
+## Overview 
 > ### _Introduction_
 This project aims to create device that measure heart rate, oxygen in user's blood and calculate user's BMI. This device is based on `ESP32 DOIT DEVKIT V1` and has `MAX30100 Pulse Oximeter` and `KY040 Rotary Encoder` acts as input and using `LED`, `Buzzer` and `Adafruit OLED 128x64 Display` acts as output.<br></br>
 By using `ESP32` as main processor unit offer a power efficient and good computational speed combine with `Pulse Oximeter` which has heart rate sensor and blood level oxygen sensor this device can be use in many aplications such as in hostipal, clinic, etcs. Using `Rotary Encoder` alongside with `OLED display` to easily receive inputs from user and allow user to navigates through menus combine with `OLED Display` to show user interfaces increasing user's friendly element.<br></br>
