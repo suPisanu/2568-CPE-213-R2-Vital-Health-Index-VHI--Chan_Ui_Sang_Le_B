@@ -53,7 +53,9 @@ By using `ESP32` as main processor unit offer a power efficient and good computa
 3. Unplug if you finished using the device.
 <br></br>
 
-> ### System's Circuit Diagram 
+> ### System's Circuit Diagram
+> ![Circuit_Diagram](https://github.com/user-attachments/assets/2b5ede92-9298-44ad-8d8a-fd2c0e151749)
+
 <br></br>
 
 > ### Block Diagram of Overall Workflow
