@@ -96,7 +96,8 @@ flowchart TD
 <br></br>
 
 > ### Demo
-[https://github.com/user-attachments/assets/d4290b7f-eb62-4639-8b0b-7ba6046d94cb](https://github.com/suPisanu/2568-CPE-213-R2-Vital-Health-Index-VHI--Chan_Ui_Sang_Le_B/blob/main/demonstration_VDO/IMG_1819.mp4)
+https://github.com/user-attachments/assets/4068e998-37fa-426f-a5e0-a2cf2def49fd
+
 
 
 
